@@ -137,5 +137,4 @@ jobs:
           curl -X POST \
             -H 'Content-Type: application/json' \
             -d '{"repository":{"url":"https://github.com/${{ github.repository }}"}}' \
-            -u "$PACKAGIST_USERNAME:$PACKAGIST_TOKEN" \
-            https://packagist.org/api/update-package?username=$PACKAGIST_USERNAME
+            "https://packagist.org/api/update-package?username=${PACKAGIST_USERNAME}&apiToken=${PACKAGIST_TOKEN}"
