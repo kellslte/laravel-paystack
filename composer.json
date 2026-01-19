@@ -3,7 +3,6 @@
     "description": "A comprehensive, scalable, and fully testable Paystack SDK for Laravel 11+",
     "type": "library",
     "license": "MIT",
-    "version": false,
     "keywords": [
         "laravel",
         "paystack",
