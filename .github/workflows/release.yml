@@ -55,13 +55,13 @@ jobs:
           else
             CURRENT_VERSION=$(grep -oP '"version":\s*"\K[^"]+' composer.json || echo "0.0.0")
             RELEASE_TYPE="${{ github.event.inputs.release_type }}"
-            
+
             IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
             MAJOR=${VERSION_PARTS[0]}
             MINOR=${VERSION_PARTS[1]}
             PATCH=${VERSION_PARTS[2]}
-            
-            case $RELEASE_TYPE in
+
+            case "$RELEASE_TYPE" in
               major)
                 MAJOR=$((MAJOR + 1))
                 MINOR=0
@@ -75,31 +75,30 @@ jobs:
                 PATCH=$((PATCH + 1))
                 ;;
             esac
-            
+
             NEW_VERSION="$MAJOR.$MINOR.$PATCH"
           fi
-          
-          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+          echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
           echo "Bumping version to $NEW_VERSION"
-          
-          # Update composer.json
-          if [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i '' "s/\"version\": \".*\"/\"version\": \"$NEW_VERSION\"/" composer.json
-          else
-            sed -i "s/\"version\": \".*\"/\"version\": \"$NEW_VERSION\"/" composer.json
-          fi
-          
-          # Update CHANGELOG entry if file exists
+
+          # Update composer.json using PHP to avoid sed portability issues
+          php -r '
+          $path = "composer.json";
+          $data = json_decode(file_get_contents($path), true);
+          $data["version"] = getenv("NEW_VERSION");
+          file_put_contents($path, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
+          '
+
+          # Prepend CHANGELOG entry if file exists
           if [ -f CHANGELOG.md ]; then
             DATE=$(date +"%Y-%m-%d")
-            if [[ "$OSTYPE" == "darwin"* ]]; then
-              sed -i '' "1i\\
-## [$NEW_VERSION] - $DATE\\
-\\
-" CHANGELOG.md
-            else
-              sed -i "1i\\## [$NEW_VERSION] - $DATE\\n" CHANGELOG.md
-            fi
+            TMP_FILE=$(mktemp)
+            {
+              printf "## [%s] - %s\n\n" "$NEW_VERSION" "$DATE"
+              cat CHANGELOG.md
+            } > "$TMP_FILE"
+            mv "$TMP_FILE" CHANGELOG.md
           fi
 
       - name: Commit version bump

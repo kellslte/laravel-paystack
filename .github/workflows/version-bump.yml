@@ -77,30 +77,29 @@ jobs:
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Bump version in composer.json
+        env:
+          NEW_VERSION: ${{ steps.new_version.outputs.new_version }}
         run: |
-          NEW_VERSION="${{ steps.new_version.outputs.new_version }}"
-          if [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i '' "s/\"version\": \".*\"/\"version\": \"$NEW_VERSION\"/" composer.json
-          else
-            sed -i "s/\"version\": \".*\"/\"version\": \"$NEW_VERSION\"/" composer.json
-          fi
+          php -r '
+          $path = "composer.json";
+          $data = json_decode(file_get_contents($path), true);
+          $data["version"] = getenv("NEW_VERSION");
+          file_put_contents($path, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
+          '
 
       - name: Update CHANGELOG
+        env:
+          NEW_VERSION: ${{ steps.new_version.outputs.new_version }}
         run: |
-          NEW_VERSION="${{ steps.new_version.outputs.new_version }}"
           DATE=$(date +"%Y-%m-%d")
           if [ -f CHANGELOG.md ]; then
-            if [[ "$OSTYPE" == "darwin"* ]]; then
-              sed -i '' "1i\\
-## [$NEW_VERSION] - $DATE\\
-\\
-### Changed\\
-- Version bump to $NEW_VERSION\\
-\\
-" CHANGELOG.md
-            else
-              sed -i "1i\\## [$NEW_VERSION] - $DATE\\n\\n### Changed\\n- Version bump to $NEW_VERSION\\n\\n" CHANGELOG.md
-            fi
+            TMP_FILE=$(mktemp)
+            {
+              printf "## [%s] - %s\n\n" "$NEW_VERSION" "$DATE"
+              printf "### Changed\n- Version bump to %s\n\n" "$NEW_VERSION"
+              cat CHANGELOG.md
+            } > "$TMP_FILE"
+            mv "$TMP_FILE" CHANGELOG.md
           fi
 
       - name: Commit changes
