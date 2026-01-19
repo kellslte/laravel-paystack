@@ -15,12 +15,18 @@ class VirtualAccount extends BaseResource
     /**
      * Create a dedicated virtual account.
      *
-     * @param array $data
-     * @return array
+     * @param \Scwar\LaravelPaystack\DTOs\Requests\VirtualAccount\CreateDedicatedAccountRequest|array $request
+     * @return \Scwar\LaravelPaystack\DTOs\Responses\VirtualAccount\DedicatedAccountData
      */
-    public function create(array $data): array
+    public function create(\Scwar\LaravelPaystack\DTOs\Requests\VirtualAccount\CreateDedicatedAccountRequest|array $request): \Scwar\LaravelPaystack\DTOs\Responses\VirtualAccount\DedicatedAccountData
     {
-        return $this->client->post('/dedicated_account', $data);
+        if (is_array($request)) {
+            $request = \Scwar\LaravelPaystack\DTOs\Requests\VirtualAccount\CreateDedicatedAccountRequest::fromArray($request);
+        }
+
+        $response = $this->client->post('/dedicated_account', $request->toArray());
+
+        return \Scwar\LaravelPaystack\DTOs\Responses\VirtualAccount\DedicatedAccountData::fromArray($this->extractData($response));
     }
 
     /**
@@ -38,14 +44,17 @@ class VirtualAccount extends BaseResource
      * List dedicated accounts.
      *
      * @param array $query
-     * @return array{data: array, pagination: Pagination|null}
+     * @return array{data: array<\Scwar\LaravelPaystack\DTOs\Responses\VirtualAccount\DedicatedAccountData>, pagination: Pagination|null}
      */
     public function list(array $query = []): array
     {
         $response = $this->client->get('/dedicated_account', $query);
 
         return [
-            'data' => $this->extractData($response) ?? [],
+            'data' => array_map(
+                fn($item) => \Scwar\LaravelPaystack\DTOs\Responses\VirtualAccount\DedicatedAccountData::fromArray($item),
+                $this->extractData($response) ?? []
+            ),
             'pagination' => $this->getPagination($response),
         ];
     }
@@ -54,13 +63,13 @@ class VirtualAccount extends BaseResource
      * Fetch a dedicated account.
      *
      * @param string $dedicatedAccountId
-     * @return array
+     * @return \Scwar\LaravelPaystack\DTOs\Responses\VirtualAccount\DedicatedAccountData
      */
-    public function fetch(string $dedicatedAccountId): array
+    public function fetch(string $dedicatedAccountId): \Scwar\LaravelPaystack\DTOs\Responses\VirtualAccount\DedicatedAccountData
     {
         $response = $this->client->get("/dedicated_account/{$dedicatedAccountId}");
 
-        return $this->extractData($response);
+        return \Scwar\LaravelPaystack\DTOs\Responses\VirtualAccount\DedicatedAccountData::fromArray($this->extractData($response));
     }
 
     /**

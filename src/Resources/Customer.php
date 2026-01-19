@@ -111,4 +111,45 @@ class Customer extends BaseResource
             'authorization_code' => $authorizationCode,
         ]);
     }
+
+    /**
+     * Validate customer identification.
+     *
+     * @param string $customerCode
+     * @param array $data
+     * @return CustomerData
+     */
+    public function validateIdentification(string $customerCode, array $data): CustomerData
+    {
+        $response = $this->client->post("/customer/{$customerCode}/identification", $data);
+
+        return CustomerData::fromArray($this->extractData($response));
+    }
+
+    /**
+     * Initialize customer authorization.
+     *
+     * @param string $customerCode
+     * @param array $data
+     * @return array
+     */
+    public function initializeAuthorization(string $customerCode, array $data): array
+    {
+        $response = $this->client->post("/customer/{$customerCode}/authorization/initialize", $data);
+
+        return $this->extractData($response);
+    }
+
+    /**
+     * Verify customer authorization.
+     *
+     * @param string $reference
+     * @return array
+     */
+    public function verifyAuthorization(string $reference): array
+    {
+        $response = $this->client->get("/customer/authorization/verify/{$reference}");
+
+        return $this->extractData($response);
+    }
 }

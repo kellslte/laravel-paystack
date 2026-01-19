@@ -3,6 +3,9 @@
 namespace Scwar\LaravelPaystack\Resources;
 
 use Scwar\LaravelPaystack\Contracts\HttpClientInterface;
+use Scwar\LaravelPaystack\DTOs\Requests\Plan\CreatePlanRequest;
+use Scwar\LaravelPaystack\DTOs\Requests\Plan\UpdatePlanRequest;
+use Scwar\LaravelPaystack\DTOs\Responses\Plan\PlanData;
 use Scwar\LaravelPaystack\Support\Pagination;
 
 class Plan extends BaseResource
@@ -15,26 +18,35 @@ class Plan extends BaseResource
     /**
      * Create a plan.
      *
-     * @param array $data
-     * @return array
+     * @param CreatePlanRequest|array $request
+     * @return PlanData
      */
-    public function create(array $data): array
+    public function create(CreatePlanRequest|array $request): PlanData
     {
-        return $this->client->post('/plan', $data);
+        if (is_array($request)) {
+            $request = CreatePlanRequest::fromArray($request);
+        }
+
+        $response = $this->client->post('/plan', $request->toArray());
+
+        return PlanData::fromArray($this->extractData($response));
     }
 
     /**
      * List plans.
      *
      * @param array $query
-     * @return array{data: array, pagination: Pagination|null}
+     * @return array{data: array<PlanData>, pagination: Pagination|null}
      */
     public function list(array $query = []): array
     {
         $response = $this->client->get('/plan', $query);
 
         return [
-            'data' => $this->extractData($response) ?? [],
+            'data' => array_map(
+                fn($item) => PlanData::fromArray($item),
+                $this->extractData($response) ?? []
+            ),
             'pagination' => $this->getPagination($response),
         ];
     }
@@ -43,26 +55,30 @@ class Plan extends BaseResource
      * Fetch a plan.
      *
      * @param string $idOrCode
-     * @return array
+     * @return PlanData
      */
-    public function fetch(string $idOrCode): array
+    public function fetch(string $idOrCode): PlanData
     {
         $response = $this->client->get("/plan/{$idOrCode}");
 
-        return $this->extractData($response);
+        return PlanData::fromArray($this->extractData($response));
     }
 
     /**
      * Update a plan.
      *
      * @param string $idOrCode
-     * @param array $data
-     * @return array
+     * @param UpdatePlanRequest|array $request
+     * @return PlanData
      */
-    public function update(string $idOrCode, array $data): array
+    public function update(string $idOrCode, UpdatePlanRequest|array $request): PlanData
     {
-        $response = $this->client->put("/plan/{$idOrCode}", $data);
+        if (is_array($request)) {
+            $request = UpdatePlanRequest::fromArray($request);
+        }
 
-        return $this->extractData($response);
+        $response = $this->client->put("/plan/{$idOrCode}", $request->toArray());
+
+        return PlanData::fromArray($this->extractData($response));
     }
 }

@@ -41,7 +41,7 @@ class Transaction extends BaseResource
      */
     public function verify(string $reference): TransactionData
     {
-        $response = $this->client->get("/transaction/verify/{$reference}");
+        $response = $this->client->get("/transaction/verify/{$reference}", []);
 
         return TransactionData::fromArray($this->extractData($response));
     }

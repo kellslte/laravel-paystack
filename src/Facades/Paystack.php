@@ -20,6 +20,13 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Scwar\LaravelPaystack\Resources\Refund refund()
  * @method static \Scwar\LaravelPaystack\Resources\Verification verification()
  * @method static \Scwar\LaravelPaystack\Resources\Miscellaneous miscellaneous()
+ * @method static \Scwar\LaravelPaystack\Resources\PaymentPage paymentPage()
+ * @method static \Scwar\LaravelPaystack\Resources\PaymentRequest paymentRequest()
+ * @method static \Scwar\LaravelPaystack\Resources\Settlement settlement()
+ * @method static \Scwar\LaravelPaystack\Resources\Authorization authorization()
+ * @method static \Scwar\LaravelPaystack\Resources\Charge charge()
+ * @method static \Scwar\LaravelPaystack\Resources\Invoice invoice()
+ * @method static \Scwar\LaravelPaystack\Resources\Integration integration()
  *
  * @see \Scwar\LaravelPaystack\Paystack
  */

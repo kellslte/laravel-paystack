@@ -16,14 +16,17 @@ class Dispute extends BaseResource
      * List disputes.
      *
      * @param array $query
-     * @return array{data: array, pagination: Pagination|null}
+     * @return array{data: array<\Scwar\LaravelPaystack\DTOs\Responses\Dispute\DisputeData>, pagination: Pagination|null}
      */
     public function list(array $query = []): array
     {
         $response = $this->client->get('/dispute', $query);
 
         return [
-            'data' => $this->extractData($response) ?? [],
+            'data' => array_map(
+                fn($item) => \Scwar\LaravelPaystack\DTOs\Responses\Dispute\DisputeData::fromArray($item),
+                $this->extractData($response) ?? []
+            ),
             'pagination' => $this->getPagination($response),
         ];
     }
@@ -32,13 +35,13 @@ class Dispute extends BaseResource
      * Fetch a dispute.
      *
      * @param string $id
-     * @return array
+     * @return \Scwar\LaravelPaystack\DTOs\Responses\Dispute\DisputeData
      */
-    public function fetch(string $id): array
+    public function fetch(string $id): \Scwar\LaravelPaystack\DTOs\Responses\Dispute\DisputeData
     {
         $response = $this->client->get("/dispute/{$id}");
 
-        return $this->extractData($response);
+        return \Scwar\LaravelPaystack\DTOs\Responses\Dispute\DisputeData::fromArray($this->extractData($response));
     }
 
     /**
@@ -46,13 +49,13 @@ class Dispute extends BaseResource
      *
      * @param string $id
      * @param array $data
-     * @return array
+     * @return \Scwar\LaravelPaystack\DTOs\Responses\Dispute\DisputeData
      */
-    public function update(string $id, array $data): array
+    public function update(string $id, array $data): \Scwar\LaravelPaystack\DTOs\Responses\Dispute\DisputeData
     {
         $response = $this->client->put("/dispute/{$id}", $data);
 
-        return $this->extractData($response);
+        return \Scwar\LaravelPaystack\DTOs\Responses\Dispute\DisputeData::fromArray($this->extractData($response));
     }
 
     /**

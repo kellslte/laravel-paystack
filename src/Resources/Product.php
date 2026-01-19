@@ -3,6 +3,9 @@
 namespace Scwar\LaravelPaystack\Resources;
 
 use Scwar\LaravelPaystack\Contracts\HttpClientInterface;
+use Scwar\LaravelPaystack\DTOs\Requests\Product\CreateProductRequest;
+use Scwar\LaravelPaystack\DTOs\Requests\Product\UpdateProductRequest;
+use Scwar\LaravelPaystack\DTOs\Responses\Product\ProductData;
 use Scwar\LaravelPaystack\Support\Pagination;
 
 class Product extends BaseResource
@@ -15,26 +18,35 @@ class Product extends BaseResource
     /**
      * Create a product.
      *
-     * @param array $data
-     * @return array
+     * @param CreateProductRequest|array $request
+     * @return ProductData
      */
-    public function create(array $data): array
+    public function create(CreateProductRequest|array $request): ProductData
     {
-        return $this->client->post('/product', $data);
+        if (is_array($request)) {
+            $request = CreateProductRequest::fromArray($request);
+        }
+
+        $response = $this->client->post('/product', $request->toArray());
+
+        return ProductData::fromArray($this->extractData($response));
     }
 
     /**
      * List products.
      *
      * @param array $query
-     * @return array{data: array, pagination: Pagination|null}
+     * @return array{data: array<ProductData>, pagination: Pagination|null}
      */
     public function list(array $query = []): array
     {
         $response = $this->client->get('/product', $query);
 
         return [
-            'data' => $this->extractData($response) ?? [],
+            'data' => array_map(
+                fn($item) => ProductData::fromArray($item),
+                $this->extractData($response) ?? []
+            ),
             'pagination' => $this->getPagination($response),
         ];
     }
@@ -43,26 +55,30 @@ class Product extends BaseResource
      * Fetch a product.
      *
      * @param string $id
-     * @return array
+     * @return ProductData
      */
-    public function fetch(string $id): array
+    public function fetch(string $id): ProductData
     {
         $response = $this->client->get("/product/{$id}");
 
-        return $this->extractData($response);
+        return ProductData::fromArray($this->extractData($response));
     }
 
     /**
      * Update a product.
      *
      * @param string $id
-     * @param array $data
-     * @return array
+     * @param UpdateProductRequest|array $request
+     * @return ProductData
      */
-    public function update(string $id, array $data): array
+    public function update(string $id, UpdateProductRequest|array $request): ProductData
     {
-        $response = $this->client->put("/product/{$id}", $data);
+        if (is_array($request)) {
+            $request = UpdateProductRequest::fromArray($request);
+        }
 
-        return $this->extractData($response);
+        $response = $this->client->put("/product/{$id}", $request->toArray());
+
+        return ProductData::fromArray($this->extractData($response));
     }
 }

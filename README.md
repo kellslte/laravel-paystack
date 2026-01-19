@@ -4,15 +4,16 @@ A comprehensive, scalable, and fully testable Paystack SDK for Laravel 11+ with 
 
 ## Features
 
-- ✅ Complete Paystack API coverage (Transactions, Customers, Subscriptions, Plans, Products, etc.)
-- ✅ Type-safe DTOs for requests and responses
-- ✅ Full webhook support with signature verification
-- ✅ Comprehensive exception handling
-- ✅ Pagination support
-- ✅ Fully tested with Pest PHP
-- ✅ Laravel 11+ compatible
-- ✅ Auto-discovery service provider
-- ✅ Facade support for easy access
+- ✅ **Complete Paystack API Coverage**: All endpoints including Transactions, Customers, Subscriptions, Plans, Products, Transfers, Refunds, Disputes, Payment Pages, Payment Requests, Settlements, Charges, Invoices, and more
+- ✅ **Type-Safe DTOs**: Immutable, strongly-typed request and response objects for all endpoints
+- ✅ **Full Webhook Support**: Signature verification, event handling, and Laravel event dispatching
+- ✅ **Comprehensive Exception Handling**: Specific exceptions for different error types
+- ✅ **Pagination Support**: Built-in pagination handling with metadata
+- ✅ **Fully Tested**: Comprehensive test suite with Pest PHP
+- ✅ **Laravel 11+ Compatible**: Built for modern Laravel applications
+- ✅ **Auto-Discovery**: Service provider automatically registered
+- ✅ **Facade Support**: Easy access via Laravel facades
+- ✅ **Production Ready**: Error handling, retries, logging, and more
 
 ## Installation
 
@@ -518,6 +519,39 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for det
 ## Support
 
 For issues, questions, or contributions, please open an issue on GitHub.
+
+## Complete API Coverage
+
+This SDK provides comprehensive coverage of the Paystack API:
+
+### Core Resources
+- ✅ **Transactions**: Initialize, verify, list, fetch, charge authorization, totals, export, timeline
+- ✅ **Charges**: Create, submit PIN/OTP/phone/birthday/address, check pending
+- ✅ **Customers**: Create, list, fetch, update, whitelist/blacklist, validate identification, manage authorizations
+- ✅ **Subscriptions**: Create, list, fetch, enable, disable, generate update link
+- ✅ **Plans**: Create, list, fetch, update
+- ✅ **Products**: Create, list, fetch, update
+
+### Payment Processing
+- ✅ **Transfers**: Initiate, list, fetch, finalize, bulk, verify, OTP management
+- ✅ **Transfer Recipients**: Create, list, fetch, update, delete
+- ✅ **Refunds**: Create, list, fetch
+- ✅ **Payment Pages**: Create, list, fetch, update, check slug availability
+- ✅ **Payment Requests**: Create, list, fetch, update, verify, send notification, finalize, archive
+
+### Advanced Features
+- ✅ **Subaccounts**: Create, list, fetch, update
+- ✅ **Splits**: Create, list, fetch, update, add/remove subaccount
+- ✅ **Virtual Accounts**: Create dedicated account, assign, list, fetch, deactivate
+- ✅ **Disputes**: List, fetch, update, export, add evidence, upload evidence URL
+- ✅ **Settlements**: List, fetch
+- ✅ **Authorizations**: List, fetch, check
+
+### Utilities
+- ✅ **Verification**: Resolve account number, BVN, card BIN, validate account
+- ✅ **Apple Pay**: Register domain, list domains, unregister domain
+- ✅ **Integration**: Get/update payment session timeout
+- ✅ **Miscellaneous**: Balance, ledger, banks, countries, states
 
 ## Changelog
 

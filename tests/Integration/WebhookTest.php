@@ -4,9 +4,6 @@ use Illuminate\Http\Request;
 use Scwar\LaravelPaystack\Support\WebhookSignature;
 use Scwar\LaravelPaystack\Webhooks\WebhookController;
 use Scwar\LaravelPaystack\Webhooks\WebhookMiddleware;
-use Scwar\LaravelPaystack\Tests\TestCase;
-
-uses(TestCase::class);
 
 beforeEach(function () {
     config(['paystack.webhook_secret' => 'test_secret']);

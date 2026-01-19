@@ -3,9 +3,6 @@
 use Mockery;
 use Scwar\LaravelPaystack\Contracts\HttpClientInterface;
 use Scwar\LaravelPaystack\Resources\Transaction;
-use Scwar\LaravelPaystack\Tests\TestCase;
-
-uses(TestCase::class);
 
 it('can initialize a transaction', function () {
     $mockClient = Mockery::mock(HttpClientInterface::class);

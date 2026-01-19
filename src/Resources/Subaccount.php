@@ -3,6 +3,8 @@
 namespace Scwar\LaravelPaystack\Resources;
 
 use Scwar\LaravelPaystack\Contracts\HttpClientInterface;
+use Scwar\LaravelPaystack\DTOs\Requests\Subaccount\CreateSubaccountRequest;
+use Scwar\LaravelPaystack\DTOs\Responses\Subaccount\SubaccountData;
 use Scwar\LaravelPaystack\Support\Pagination;
 
 class Subaccount extends BaseResource
@@ -15,26 +17,35 @@ class Subaccount extends BaseResource
     /**
      * Create a subaccount.
      *
-     * @param array $data
-     * @return array
+     * @param CreateSubaccountRequest|array $request
+     * @return SubaccountData
      */
-    public function create(array $data): array
+    public function create(CreateSubaccountRequest|array $request): SubaccountData
     {
-        return $this->client->post('/subaccount', $data);
+        if (is_array($request)) {
+            $request = CreateSubaccountRequest::fromArray($request);
+        }
+
+        $response = $this->client->post('/subaccount', $request->toArray());
+
+        return SubaccountData::fromArray($this->extractData($response));
     }
 
     /**
      * List subaccounts.
      *
      * @param array $query
-     * @return array{data: array, pagination: Pagination|null}
+     * @return array{data: array<SubaccountData>, pagination: Pagination|null}
      */
     public function list(array $query = []): array
     {
         $response = $this->client->get('/subaccount', $query);
 
         return [
-            'data' => $this->extractData($response) ?? [],
+            'data' => array_map(
+                fn($item) => SubaccountData::fromArray($item),
+                $this->extractData($response) ?? []
+            ),
             'pagination' => $this->getPagination($response),
         ];
     }
@@ -43,13 +54,13 @@ class Subaccount extends BaseResource
      * Fetch a subaccount.
      *
      * @param string $idOrCode
-     * @return array
+     * @return SubaccountData
      */
-    public function fetch(string $idOrCode): array
+    public function fetch(string $idOrCode): SubaccountData
     {
         $response = $this->client->get("/subaccount/{$idOrCode}");
 
-        return $this->extractData($response);
+        return SubaccountData::fromArray($this->extractData($response));
     }
 
     /**
@@ -57,12 +68,12 @@ class Subaccount extends BaseResource
      *
      * @param string $idOrCode
      * @param array $data
-     * @return array
+     * @return SubaccountData
      */
-    public function update(string $idOrCode, array $data): array
+    public function update(string $idOrCode, array $data): SubaccountData
     {
         $response = $this->client->put("/subaccount/{$idOrCode}", $data);
 
-        return $this->extractData($response);
+        return SubaccountData::fromArray($this->extractData($response));
     }
 }

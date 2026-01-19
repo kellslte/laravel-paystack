@@ -18,6 +18,13 @@ use Scwar\LaravelPaystack\Resources\Dispute;
 use Scwar\LaravelPaystack\Resources\Refund;
 use Scwar\LaravelPaystack\Resources\Verification;
 use Scwar\LaravelPaystack\Resources\Miscellaneous;
+use Scwar\LaravelPaystack\Resources\PaymentPage;
+use Scwar\LaravelPaystack\Resources\PaymentRequest;
+use Scwar\LaravelPaystack\Resources\Settlement;
+use Scwar\LaravelPaystack\Resources\Authorization;
+use Scwar\LaravelPaystack\Resources\Charge;
+use Scwar\LaravelPaystack\Resources\Invoice;
+use Scwar\LaravelPaystack\Resources\Integration;
 
 class Paystack
 {
@@ -38,6 +45,13 @@ class Paystack
     protected ?Refund $refund = null;
     protected ?Verification $verification = null;
     protected ?Miscellaneous $miscellaneous = null;
+    protected ?PaymentPage $paymentPage = null;
+    protected ?PaymentRequest $paymentRequest = null;
+    protected ?Settlement $settlement = null;
+    protected ?Authorization $authorization = null;
+    protected ?Charge $charge = null;
+    protected ?Invoice $invoice = null;
+    protected ?Integration $integration = null;
 
     public function __construct(HttpClientInterface $client)
     {
@@ -177,5 +191,68 @@ class Paystack
         }
 
         return $this->miscellaneous;
+    }
+
+    public function paymentPage(): PaymentPage
+    {
+        if (!$this->paymentPage) {
+            $this->paymentPage = new PaymentPage($this->client);
+        }
+
+        return $this->paymentPage;
+    }
+
+    public function paymentRequest(): PaymentRequest
+    {
+        if (!$this->paymentRequest) {
+            $this->paymentRequest = new PaymentRequest($this->client);
+        }
+
+        return $this->paymentRequest;
+    }
+
+    public function settlement(): Settlement
+    {
+        if (!$this->settlement) {
+            $this->settlement = new Settlement($this->client);
+        }
+
+        return $this->settlement;
+    }
+
+    public function authorization(): Authorization
+    {
+        if (!$this->authorization) {
+            $this->authorization = new Authorization($this->client);
+        }
+
+        return $this->authorization;
+    }
+
+    public function charge(): Charge
+    {
+        if (!$this->charge) {
+            $this->charge = new Charge($this->client);
+        }
+
+        return $this->charge;
+    }
+
+    public function invoice(): Invoice
+    {
+        if (!$this->invoice) {
+            $this->invoice = new Invoice($this->client);
+        }
+
+        return $this->invoice;
+    }
+
+    public function integration(): Integration
+    {
+        if (!$this->integration) {
+            $this->integration = new Integration($this->client);
+        }
+
+        return $this->integration;
     }
 }

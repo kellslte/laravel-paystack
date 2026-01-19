@@ -15,26 +15,35 @@ class Transfer extends BaseResource
     /**
      * Initiate a transfer.
      *
-     * @param array $data
-     * @return array
+     * @param \Scwar\LaravelPaystack\DTOs\Requests\Transfer\InitiateTransferRequest|array $request
+     * @return \Scwar\LaravelPaystack\DTOs\Responses\Transfer\TransferData
      */
-    public function initiate(array $data): array
+    public function initiate(\Scwar\LaravelPaystack\DTOs\Requests\Transfer\InitiateTransferRequest|array $request): \Scwar\LaravelPaystack\DTOs\Responses\Transfer\TransferData
     {
-        return $this->client->post('/transfer', $data);
+        if (is_array($request)) {
+            $request = \Scwar\LaravelPaystack\DTOs\Requests\Transfer\InitiateTransferRequest::fromArray($request);
+        }
+
+        $response = $this->client->post('/transfer', $request->toArray());
+
+        return \Scwar\LaravelPaystack\DTOs\Responses\Transfer\TransferData::fromArray($this->extractData($response));
     }
 
     /**
      * List transfers.
      *
      * @param array $query
-     * @return array{data: array, pagination: Pagination|null}
+     * @return array{data: array<\Scwar\LaravelPaystack\DTOs\Responses\Transfer\TransferData>, pagination: Pagination|null}
      */
     public function list(array $query = []): array
     {
         $response = $this->client->get('/transfer', $query);
 
         return [
-            'data' => $this->extractData($response) ?? [],
+            'data' => array_map(
+                fn($item) => \Scwar\LaravelPaystack\DTOs\Responses\Transfer\TransferData::fromArray($item),
+                $this->extractData($response) ?? []
+            ),
             'pagination' => $this->getPagination($response),
         ];
     }
@@ -43,13 +52,13 @@ class Transfer extends BaseResource
      * Fetch a transfer.
      *
      * @param string $idOrCode
-     * @return array
+     * @return \Scwar\LaravelPaystack\DTOs\Responses\Transfer\TransferData
      */
-    public function fetch(string $idOrCode): array
+    public function fetch(string $idOrCode): \Scwar\LaravelPaystack\DTOs\Responses\Transfer\TransferData
     {
         $response = $this->client->get("/transfer/{$idOrCode}");
 
-        return $this->extractData($response);
+        return \Scwar\LaravelPaystack\DTOs\Responses\Transfer\TransferData::fromArray($this->extractData($response));
     }
 
     /**
@@ -66,12 +75,16 @@ class Transfer extends BaseResource
     /**
      * Initiate bulk transfer.
      *
-     * @param array $data
+     * @param \Scwar\LaravelPaystack\DTOs\Requests\Transfer\BulkTransferRequest|array $request
      * @return array
      */
-    public function bulk(array $data): array
+    public function bulk(\Scwar\LaravelPaystack\DTOs\Requests\Transfer\BulkTransferRequest|array $request): array
     {
-        return $this->client->post('/transfer/bulk', $data);
+        if (is_array($request)) {
+            $request = \Scwar\LaravelPaystack\DTOs\Requests\Transfer\BulkTransferRequest::fromArray($request);
+        }
+
+        return $this->client->post('/transfer/bulk', $request->toArray());
     }
 
     /**

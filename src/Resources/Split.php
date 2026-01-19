@@ -3,6 +3,8 @@
 namespace Scwar\LaravelPaystack\Resources;
 
 use Scwar\LaravelPaystack\Contracts\HttpClientInterface;
+use Scwar\LaravelPaystack\DTOs\Requests\Split\CreateSplitRequest;
+use Scwar\LaravelPaystack\DTOs\Responses\Split\SplitData;
 use Scwar\LaravelPaystack\Support\Pagination;
 
 class Split extends BaseResource
@@ -15,26 +17,35 @@ class Split extends BaseResource
     /**
      * Create a split.
      *
-     * @param array $data
-     * @return array
+     * @param CreateSplitRequest|array $request
+     * @return SplitData
      */
-    public function create(array $data): array
+    public function create(CreateSplitRequest|array $request): SplitData
     {
-        return $this->client->post('/split', $data);
+        if (is_array($request)) {
+            $request = CreateSplitRequest::fromArray($request);
+        }
+
+        $response = $this->client->post('/split', $request->toArray());
+
+        return SplitData::fromArray($this->extractData($response));
     }
 
     /**
      * List splits.
      *
      * @param array $query
-     * @return array{data: array, pagination: Pagination|null}
+     * @return array{data: array<SplitData>, pagination: Pagination|null}
      */
     public function list(array $query = []): array
     {
         $response = $this->client->get('/split', $query);
 
         return [
-            'data' => $this->extractData($response) ?? [],
+            'data' => array_map(
+                fn($item) => SplitData::fromArray($item),
+                $this->extractData($response) ?? []
+            ),
             'pagination' => $this->getPagination($response),
         ];
     }
@@ -43,13 +54,13 @@ class Split extends BaseResource
      * Fetch a split.
      *
      * @param string $id
-     * @return array
+     * @return SplitData
      */
-    public function fetch(string $id): array
+    public function fetch(string $id): SplitData
     {
         $response = $this->client->get("/split/{$id}");
 
-        return $this->extractData($response);
+        return SplitData::fromArray($this->extractData($response));
     }
 
     /**
@@ -57,13 +68,13 @@ class Split extends BaseResource
      *
      * @param string $id
      * @param array $data
-     * @return array
+     * @return SplitData
      */
-    public function update(string $id, array $data): array
+    public function update(string $id, array $data): SplitData
     {
         $response = $this->client->put("/split/{$id}", $data);
 
-        return $this->extractData($response);
+        return SplitData::fromArray($this->extractData($response));
     }
 
     /**
@@ -71,11 +82,13 @@ class Split extends BaseResource
      *
      * @param string $id
      * @param array $data
-     * @return array
+     * @return SplitData
      */
-    public function addSubaccount(string $id, array $data): array
+    public function addSubaccount(string $id, array $data): SplitData
     {
-        return $this->client->post("/split/{$id}/subaccount/add", $data);
+        $response = $this->client->post("/split/{$id}/subaccount/add", $data);
+
+        return SplitData::fromArray($this->extractData($response));
     }
 
     /**
@@ -83,12 +96,14 @@ class Split extends BaseResource
      *
      * @param string $id
      * @param string $subaccount
-     * @return array
+     * @return SplitData
      */
-    public function removeSubaccount(string $id, string $subaccount): array
+    public function removeSubaccount(string $id, string $subaccount): SplitData
     {
-        return $this->client->post("/split/{$id}/subaccount/remove", [
+        $response = $this->client->post("/split/{$id}/subaccount/remove", [
             'subaccount' => $subaccount,
         ]);
+
+        return SplitData::fromArray($this->extractData($response));
     }
 }

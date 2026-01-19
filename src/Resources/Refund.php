@@ -15,26 +15,35 @@ class Refund extends BaseResource
     /**
      * Create a refund.
      *
-     * @param array $data
-     * @return array
+     * @param \Scwar\LaravelPaystack\DTOs\Requests\Refund\CreateRefundRequest|array $request
+     * @return \Scwar\LaravelPaystack\DTOs\Responses\Refund\RefundData
      */
-    public function create(array $data): array
+    public function create(\Scwar\LaravelPaystack\DTOs\Requests\Refund\CreateRefundRequest|array $request): \Scwar\LaravelPaystack\DTOs\Responses\Refund\RefundData
     {
-        return $this->client->post('/refund', $data);
+        if (is_array($request)) {
+            $request = \Scwar\LaravelPaystack\DTOs\Requests\Refund\CreateRefundRequest::fromArray($request);
+        }
+
+        $response = $this->client->post('/refund', $request->toArray());
+
+        return \Scwar\LaravelPaystack\DTOs\Responses\Refund\RefundData::fromArray($this->extractData($response));
     }
 
     /**
      * List refunds.
      *
      * @param array $query
-     * @return array{data: array, pagination: Pagination|null}
+     * @return array{data: array<\Scwar\LaravelPaystack\DTOs\Responses\Refund\RefundData>, pagination: Pagination|null}
      */
     public function list(array $query = []): array
     {
         $response = $this->client->get('/refund', $query);
 
         return [
-            'data' => $this->extractData($response) ?? [],
+            'data' => array_map(
+                fn($item) => \Scwar\LaravelPaystack\DTOs\Responses\Refund\RefundData::fromArray($item),
+                $this->extractData($response) ?? []
+            ),
             'pagination' => $this->getPagination($response),
         ];
     }
@@ -43,12 +52,12 @@ class Refund extends BaseResource
      * Fetch a refund.
      *
      * @param string $idOrReference
-     * @return array
+     * @return \Scwar\LaravelPaystack\DTOs\Responses\Refund\RefundData
      */
-    public function fetch(string $idOrReference): array
+    public function fetch(string $idOrReference): \Scwar\LaravelPaystack\DTOs\Responses\Refund\RefundData
     {
         $response = $this->client->get("/refund/{$idOrReference}");
 
-        return $this->extractData($response);
+        return \Scwar\LaravelPaystack\DTOs\Responses\Refund\RefundData::fromArray($this->extractData($response));
     }
 }

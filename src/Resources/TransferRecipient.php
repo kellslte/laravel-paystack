@@ -15,26 +15,35 @@ class TransferRecipient extends BaseResource
     /**
      * Create a transfer recipient.
      *
-     * @param array $data
-     * @return array
+     * @param \Scwar\LaravelPaystack\DTOs\Requests\TransferRecipient\CreateTransferRecipientRequest|array $request
+     * @return \Scwar\LaravelPaystack\DTOs\Responses\TransferRecipient\TransferRecipientData
      */
-    public function create(array $data): array
+    public function create(\Scwar\LaravelPaystack\DTOs\Requests\TransferRecipient\CreateTransferRecipientRequest|array $request): \Scwar\LaravelPaystack\DTOs\Responses\TransferRecipient\TransferRecipientData
     {
-        return $this->client->post('/transferrecipient', $data);
+        if (is_array($request)) {
+            $request = \Scwar\LaravelPaystack\DTOs\Requests\TransferRecipient\CreateTransferRecipientRequest::fromArray($request);
+        }
+
+        $response = $this->client->post('/transferrecipient', $request->toArray());
+
+        return \Scwar\LaravelPaystack\DTOs\Responses\TransferRecipient\TransferRecipientData::fromArray($this->extractData($response));
     }
 
     /**
      * List transfer recipients.
      *
      * @param array $query
-     * @return array{data: array, pagination: Pagination|null}
+     * @return array{data: array<\Scwar\LaravelPaystack\DTOs\Responses\TransferRecipient\TransferRecipientData>, pagination: Pagination|null}
      */
     public function list(array $query = []): array
     {
         $response = $this->client->get('/transferrecipient', $query);
 
         return [
-            'data' => $this->extractData($response) ?? [],
+            'data' => array_map(
+                fn($item) => \Scwar\LaravelPaystack\DTOs\Responses\TransferRecipient\TransferRecipientData::fromArray($item),
+                $this->extractData($response) ?? []
+            ),
             'pagination' => $this->getPagination($response),
         ];
     }
@@ -43,13 +52,13 @@ class TransferRecipient extends BaseResource
      * Fetch a transfer recipient.
      *
      * @param string $idOrCode
-     * @return array
+     * @return \Scwar\LaravelPaystack\DTOs\Responses\TransferRecipient\TransferRecipientData
      */
-    public function fetch(string $idOrCode): array
+    public function fetch(string $idOrCode): \Scwar\LaravelPaystack\DTOs\Responses\TransferRecipient\TransferRecipientData
     {
         $response = $this->client->get("/transferrecipient/{$idOrCode}");
 
-        return $this->extractData($response);
+        return \Scwar\LaravelPaystack\DTOs\Responses\TransferRecipient\TransferRecipientData::fromArray($this->extractData($response));
     }
 
     /**
@@ -57,13 +66,13 @@ class TransferRecipient extends BaseResource
      *
      * @param string $idOrCode
      * @param array $data
-     * @return array
+     * @return \Scwar\LaravelPaystack\DTOs\Responses\TransferRecipient\TransferRecipientData
      */
-    public function update(string $idOrCode, array $data): array
+    public function update(string $idOrCode, array $data): \Scwar\LaravelPaystack\DTOs\Responses\TransferRecipient\TransferRecipientData
     {
         $response = $this->client->put("/transferrecipient/{$idOrCode}", $data);
 
-        return $this->extractData($response);
+        return \Scwar\LaravelPaystack\DTOs\Responses\TransferRecipient\TransferRecipientData::fromArray($this->extractData($response));
     }
 
     /**

@@ -3,6 +3,8 @@
 namespace Scwar\LaravelPaystack\Resources;
 
 use Scwar\LaravelPaystack\Contracts\HttpClientInterface;
+use Scwar\LaravelPaystack\DTOs\Requests\Subscription\CreateSubscriptionRequest;
+use Scwar\LaravelPaystack\DTOs\Responses\Subscription\SubscriptionData;
 use Scwar\LaravelPaystack\Support\Pagination;
 
 class Subscription extends BaseResource
@@ -15,26 +17,35 @@ class Subscription extends BaseResource
     /**
      * Create a subscription.
      *
-     * @param array $data
-     * @return array
+     * @param CreateSubscriptionRequest|array $request
+     * @return SubscriptionData
      */
-    public function create(array $data): array
+    public function create(CreateSubscriptionRequest|array $request): SubscriptionData
     {
-        return $this->client->post('/subscription', $data);
+        if (is_array($request)) {
+            $request = CreateSubscriptionRequest::fromArray($request);
+        }
+
+        $response = $this->client->post('/subscription', $request->toArray());
+
+        return SubscriptionData::fromArray($this->extractData($response));
     }
 
     /**
      * List subscriptions.
      *
      * @param array $query
-     * @return array{data: array, pagination: Pagination|null}
+     * @return array{data: array<SubscriptionData>, pagination: Pagination|null}
      */
     public function list(array $query = []): array
     {
         $response = $this->client->get('/subscription', $query);
 
         return [
-            'data' => $this->extractData($response) ?? [],
+            'data' => array_map(
+                fn($item) => SubscriptionData::fromArray($item),
+                $this->extractData($response) ?? []
+            ),
             'pagination' => $this->getPagination($response),
         ];
     }
@@ -43,13 +54,13 @@ class Subscription extends BaseResource
      * Fetch a subscription.
      *
      * @param string $idOrCode
-     * @return array
+     * @return SubscriptionData
      */
-    public function fetch(string $idOrCode): array
+    public function fetch(string $idOrCode): SubscriptionData
     {
         $response = $this->client->get("/subscription/{$idOrCode}");
 
-        return $this->extractData($response);
+        return SubscriptionData::fromArray($this->extractData($response));
     }
 
     /**
@@ -57,14 +68,16 @@ class Subscription extends BaseResource
      *
      * @param string $code
      * @param string $token
-     * @return array
+     * @return SubscriptionData
      */
-    public function enable(string $code, string $token): array
+    public function enable(string $code, string $token): SubscriptionData
     {
-        return $this->client->post("/subscription/enable", [
+        $response = $this->client->post("/subscription/enable", [
             'code' => $code,
             'token' => $token,
         ]);
+
+        return SubscriptionData::fromArray($this->extractData($response));
     }
 
     /**
@@ -72,14 +85,16 @@ class Subscription extends BaseResource
      *
      * @param string $code
      * @param string $token
-     * @return array
+     * @return SubscriptionData
      */
-    public function disable(string $code, string $token): array
+    public function disable(string $code, string $token): SubscriptionData
     {
-        return $this->client->post("/subscription/disable", [
+        $response = $this->client->post("/subscription/disable", [
             'code' => $code,
             'token' => $token,
         ]);
+
+        return SubscriptionData::fromArray($this->extractData($response));
     }
 
     /**

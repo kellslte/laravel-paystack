@@ -3,9 +3,6 @@
 use Mockery;
 use Scwar\LaravelPaystack\Contracts\HttpClientInterface;
 use Scwar\LaravelPaystack\Resources\Customer;
-use Scwar\LaravelPaystack\Tests\TestCase;
-
-uses(TestCase::class);
 
 it('can create a customer', function () {
     $mockClient = Mockery::mock(HttpClientInterface::class);
