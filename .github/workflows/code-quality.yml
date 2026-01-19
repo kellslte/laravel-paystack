@@ -1,0 +1,62 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  phpstan:
+    name: PHPStan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Run PHPStan
+        continue-on-error: true
+        run: |
+          if [ -f phpstan.neon ] || [ -f phpstan.dist.neon ]; then
+            composer require --dev phpstan/phpstan --no-interaction
+            vendor/bin/phpstan analyse
+          else
+            echo "PHPStan configuration not found. Skipping."
+          fi
+
+  cs-fixer:
+    name: Code Style
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Check code style
+        continue-on-error: true
+        run: |
+          if [ -f .php-cs-fixer.php ] || [ -f .php-cs-fixer.dist.php ]; then
+            composer require --dev friendsofphp/php-cs-fixer --no-interaction
+            vendor/bin/php-cs-fixer fix --dry-run --diff
+          else
+            echo "PHP CS Fixer configuration not found. Skipping."
+          fi

@@ -1,0 +1,135 @@
+name: Version Bump
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Type of version bump'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: patch
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick
+
+      - name: Get current version
+        id: current_version
+        run: |
+          CURRENT_VERSION=$(grep -oP '"version":\s*"\K[^"]+' composer.json || echo "0.0.0")
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "Current version: $CURRENT_VERSION"
+
+      - name: Calculate new version
+        id: new_version
+        run: |
+          CURRENT_VERSION="${{ steps.current_version.outputs.current_version }}"
+          VERSION_TYPE="${{ github.event.inputs.version_type }}"
+          
+          IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+          MAJOR=${VERSION_PARTS[0]}
+          MINOR=${VERSION_PARTS[1]}
+          PATCH=${VERSION_PARTS[2]}
+          
+          case $VERSION_TYPE in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+          
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "New version: $NEW_VERSION"
+
+      - name: Create branch
+        run: |
+          BRANCH_NAME="bump-version-${{ steps.new_version.outputs.new_version }}"
+          git checkout -b $BRANCH_NAME
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_ENV
+
+      - name: Bump version in composer.json
+        run: |
+          NEW_VERSION="${{ steps.new_version.outputs.new_version }}"
+          if [[ "$OSTYPE" == "darwin"* ]]; then
+            sed -i '' "s/\"version\": \".*\"/\"version\": \"$NEW_VERSION\"/" composer.json
+          else
+            sed -i "s/\"version\": \".*\"/\"version\": \"$NEW_VERSION\"/" composer.json
+          fi
+
+      - name: Update CHANGELOG
+        run: |
+          NEW_VERSION="${{ steps.new_version.outputs.new_version }}"
+          DATE=$(date +"%Y-%m-%d")
+          if [ -f CHANGELOG.md ]; then
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+              sed -i '' "1i\\
+## [$NEW_VERSION] - $DATE\\
+\\
+### Changed\\
+- Version bump to $NEW_VERSION\\
+\\
+" CHANGELOG.md
+            else
+              sed -i "1i\\## [$NEW_VERSION] - $DATE\\n\\n### Changed\\n- Version bump to $NEW_VERSION\\n\\n" CHANGELOG.md
+            fi
+          fi
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add composer.json CHANGELOG.md
+          git commit -m "chore: bump version to ${{ steps.new_version.outputs.new_version }}"
+
+      - name: Push changes
+        run: |
+          git push origin ${{ env.branch_name }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ env.branch_name }}
+          title: "chore: bump version to ${{ steps.new_version.outputs.new_version }}"
+          body: |
+            ## Version Bump
+            
+            This PR bumps the version from **${{ steps.current_version.outputs.current_version }}** to **${{ steps.new_version.outputs.new_version }}**.
+            
+            - **Version Type**: ${{ github.event.inputs.version_type }}
+            - **Current Version**: ${{ steps.current_version.outputs.current_version }}
+            - **New Version**: ${{ steps.new_version.outputs.new_version }}
+            
+            Please review and merge when ready.
+          labels: |
+            version-bump
+            automated

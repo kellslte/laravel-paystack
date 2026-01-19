@@ -1,0 +1,66 @@
+{
+    "name": "scwar/laravel-paystack",
+    "description": "A comprehensive, scalable, and fully testable Paystack SDK for Laravel 11+",
+    "type": "library",
+    "license": "MIT",
+    "version": "1.0.0",
+    "keywords": [
+        "laravel",
+        "paystack",
+        "payment",
+        "sdk",
+        "api"
+    ],
+    "authors": [
+        {
+            "name": "scwar",
+            "email": ""
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^11.0",
+        "illuminate/http": "^11.0",
+        "illuminate/routing": "^11.0",
+        "illuminate/events": "^11.0",
+        "guzzlehttp/guzzle": "^7.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^10.0",
+        "pestphp/pest": "^3.0",
+        "pestphp/pest-plugin-laravel": "^3.0",
+        "mockery/mockery": "^1.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Scwar\\LaravelPaystack\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Scwar\\LaravelPaystack\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Scwar\\LaravelPaystack\\PaystackServiceProvider"
+            ],
+            "aliases": {
+                "Paystack": "Scwar\\LaravelPaystack\\Facades\\Paystack"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "scripts": {
+        "test": "pest",
+        "test:coverage": "pest --coverage"
+    }
+}
